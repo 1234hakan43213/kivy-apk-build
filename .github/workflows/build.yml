@@ -1,0 +1,26 @@
+name: CI
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      # Buildozer ile APK Derleme İşlemi
+      - name: Build with Buildozer
+        uses: ArtemSBulgakov/buildozer-action-v1@release
+        id: buildozer
+        with:
+          command: buildozer android debug
+          buildozer_version: master
+
+      # Oluşan APK'yı GitHub'a Yükleme
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: package
+          path: ${{ steps.buildozer.outputs.filename }}
