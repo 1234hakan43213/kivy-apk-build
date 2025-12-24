@@ -12,7 +12,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # 1. Adım: Önbellekleme (Ağ hatalarını önlemek ve hızı artırmak için)
+      # 1. ADIM: Java 17 Kurulumu (Bu adım kritik, Java 21 hatasını çözer)
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      # 2. ADIM: Önbellekleme
       - name: Get Date
         id: get-date
         run: |
@@ -31,7 +38,7 @@ jobs:
           path: .buildozer
           key: ${{ runner.os }}-${{ steps.get-date.outputs.date }}-${{ hashFiles('buildozer.spec') }}
 
-      # 2. Adım: Sistem Bağımlılıklarını Yükleme (Hata aldığın kısım burasıydı)
+      # 3. ADIM: Gerekli Kütüphaneler
       - name: Install dependencies
         run: |
           sudo apt-get update -y
@@ -55,21 +62,22 @@ jobs:
             libncursesw5-dev \
             libtinfo5 \
             cmake \
-            openjdk-17-jdk \
             zip \
             unzip
 
-      # 3. Adım: Buildozer Kurulumu
+      # 4. ADIM: Buildozer Kurulumu
       - name: Install Buildozer
         run: |
           pip3 install --upgrade buildozer cython virtualenv
 
-      # 4. Adım: Derleme
+      # 5. ADIM: Derleme (Burada echo "y" ve -v kullanıyoruz)
       - name: Build with Buildozer
         run: |
-          yes | buildozer android debug
+          # yes | yerine echo "y" | kullanarak pipe hatasını engelliyoruz
+          # -v parametresi hatayı detaylı görmemizi sağlar
+          echo "y" | buildozer -v android debug
 
-      # 5. Adım: APK'yı Yükleme
+      # 6. ADIM: APK Yükleme
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
